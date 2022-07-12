@@ -2,3 +2,4 @@ UR_STREAM/bin/
 UR_STREAM/obj/
 packages/
 .vs/
+UR_STREAM/*.csproj.user
