@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
@@ -18,13 +19,23 @@ namespace UR_STREAM
     /// <summary>
     /// MainWindow.xaml 的交互逻辑
     /// </summary>
-    public partial class MainWindow : Window
+    public partial class MainWindow
     {
+        private readonly MainWindowViewModel MV = null;
+
         public MainWindow()
         {
             InitializeComponent();
-            MainWindowViewModel MV = new MainWindowViewModel();
+            MV = new MainWindowViewModel();
             this.DataContext = MV;
+        }
+
+        private void ConnectButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is ToggleButton)
+            {
+                MV.CanConnect = false;
+            }
         }
     }
 }
