@@ -120,7 +120,7 @@
                 Effect="{DynamicResource EffectShadow2}">
                 <Border CornerRadius="4,4,0,0">
                     <DataGrid
-                        HorizontalAlignment="Center"
+                        HorizontalAlignment="Stretch"
                         AutoGenerateColumns="False"
                         FontSize="18"
                         FontWeight="Bold"
