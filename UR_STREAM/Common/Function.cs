@@ -20,8 +20,14 @@ namespace UR_STREAM.Common
         public StreamHelper(byte[] arrMsgRec)
         {
             ArrMsgRec = arrMsgRec;
+            Time = DateTime.Now;
         }
 
+        public DateTime GetTime()
+        {
+            return Time;
+        }
+        public DateTime Time;
         public double GetDeg(int index)
         {
             byte[] tem_arr = new byte[ArrMsgRec.Length];

@@ -126,7 +126,7 @@
                         FontWeight="Bold"
                         HeadersVisibility="All"
                         IsReadOnly="True"
-                        ItemsSource="{Binding URDataList}"
+                        ItemsSource="{Binding CurrentData}"
                         MinRowHeight="60"
                         RowHeaderWidth="50"
                         Visibility="{Binding IsRunning, Converter={StaticResource BoolToVisibilityConverter}}">

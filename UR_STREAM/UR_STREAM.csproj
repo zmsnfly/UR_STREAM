@@ -283,6 +283,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Common\Function.cs" />
+    <Compile Include="Models\KeyValueModel.cs" />
     <Compile Include="Models\URData.cs" />
     <Compile Include="ViewModels\MainWindowViewModel.cs" />
     <Compile Include="Views\MainWindow.xaml.cs">

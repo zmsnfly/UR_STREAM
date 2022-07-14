@@ -3,6 +3,7 @@ using Microsoft.Toolkit.Mvvm.ComponentModel;
 using Microsoft.Toolkit.Mvvm.Input;
 using Microsoft.Win32;
 using NPOI.HSSF.UserModel;
+using NPOI.HSSF.Util;
 using NPOI.SS.UserModel;
 using NPOI.XSSF.UserModel;
 using System;
@@ -31,8 +32,8 @@ namespace UR_STREAM.ViewModels
             IsConnecting = false;
             CanConnect = true;
             IsRecording = false;
-            ActionRemoveUnusedItem = new Action(RemoveUnusedItem);
-            URDataList = new ObservableCollection<URData>();
+            URDataList = new List<URData>();
+            CurrentData = new ObservableCollection<KeyValueModel>();
             KeyList = new Dictionary<string, double>();
             InitURDataList();
         }
@@ -43,18 +44,27 @@ namespace UR_STREAM.ViewModels
             URDataList.Clear();
         }
 
-        private ObservableCollection<URData> urDataList;
-        public ObservableCollection<URData> URDataList
+        private List<URData> urDataList;
+        public List<URData> URDataList
         {
-            get => urDataList;
-            set => SetProperty(ref urDataList, value);
+            get { return urDataList; }
+            set { urDataList = value; }
         }
 
-        public static List<URData> DataCache = new List<URData>();
+
+        private ObservableCollection<KeyValueModel> currentData;
+        public ObservableCollection<KeyValueModel> CurrentData
+        {
+            get => currentData;
+            set => SetProperty(ref currentData, value);
+        }
 
         public Dictionary<string, double> KeyList { get; set; }
 
         private readonly UInt32 TotalMsgLength = 3288596480;
+
+        public int StartIndex { get; set; }
+        public int EndIndex { get; set; }
 
         private Socket SocketClient = null;
         private Task TaskClient = null;
@@ -295,26 +305,32 @@ namespace UR_STREAM.ViewModels
                         KeyList["RY"] = streamHelper.GetRad(60);
                         KeyList["RZ"] = streamHelper.GetRad(61);
 
+                        URData urData = new URData
+                        {
+                            Time = streamHelper.GetTime(),
+                            KeyDic = new Dictionary<string, double>(KeyList)
+                        };
+                        URDataList.Add(urData);
+
                         Application.Current.Dispatcher.Invoke(RemoveUnusedItem);
 
                         foreach (var key in KeyList)
                         {
                             bool isContain = false;
-                            foreach (var data in URDataList)
+                            foreach (var data in CurrentData)
                             {
                                 if (data.Key.Equals(key.Key))
                                 {
                                     isContain = true;
                                     data.Value = key.Value;
-                                    data.Time = DateTime.Now;
-                                    DataCache.Add(data);
+                                    data.Time = streamHelper.GetTime();
                                 }
                             }
                             if (!isContain)
                             {
                                 Application.Current.Dispatcher.Invoke((Action)(() =>
                                 {
-                                    URDataList.Add(new URData(DateTime.Now, key.Key, key.Value));
+                                    CurrentData.Add(new KeyValueModel(DateTime.Now, key.Key, key.Value));
                                 }));
                             }
                         }
@@ -324,18 +340,9 @@ namespace UR_STREAM.ViewModels
             }
         }
 
-        private bool? isConnecting;
-
-        public bool? IsConnecting { get => isConnecting; set => SetProperty(ref isConnecting, value); }
-
-        private bool? canConnect;
-
-        public bool? CanConnect { get => canConnect; set => SetProperty(ref canConnect, value); }
-
-        public Action ActionRemoveUnusedItem { get; private set; }
-        public void RemoveUnusedItem()
+        private void RemoveUnusedItem()
         {
-            foreach (var data in URDataList.ToArray())
+            foreach (var data in CurrentData.ToArray())
             {
                 bool isContain = false;
                 foreach (var key in KeyList)
@@ -347,10 +354,18 @@ namespace UR_STREAM.ViewModels
                 }
                 if (!isContain)
                 {
-                    URDataList.Remove(data);
+                    CurrentData.Remove(data);
                 }
             }
         }
+
+        private bool? isConnecting;
+
+        public bool? IsConnecting { get => isConnecting; set => SetProperty(ref isConnecting, value); }
+
+        private bool? canConnect;
+
+        public bool? CanConnect { get => canConnect; set => SetProperty(ref canConnect, value); }
 
         private RelayCommand recordCommand;
 
@@ -373,10 +388,11 @@ namespace UR_STREAM.ViewModels
             {
                 SaveFinished = false;
                 Growl.Info("正在记录数据");
-
+                StartIndex = URDataList.Count;
             }
             else
             {
+                EndIndex = URDataList.Count;
                 SaveFileDialog dialog = new SaveFileDialog
                 {
                     Filter = "UR机器人信息（*.xlsx)|*.xlsx",
@@ -398,11 +414,23 @@ namespace UR_STREAM.ViewModels
 
         private void CreateXls(string filePath)
         {
+            List<URData> TemData = new List<URData>(URDataList);
+            var DataCut = TemData.Skip(StartIndex).Take(EndIndex - StartIndex).ToArray();
             string excelPath = filePath;
 
             FileStream fs = new FileStream(excelPath, FileMode.OpenOrCreate, FileAccess.ReadWrite);
 
             IWorkbook workbook = new XSSFWorkbook();
+
+            ICellStyle styleHeader = workbook.CreateCellStyle();
+            styleHeader.FillForegroundColor = NPOI.HSSF.Util.HSSFColor.BlueGrey.Index;
+            styleHeader.FillPattern = FillPattern.SolidForeground;
+            styleHeader.Alignment = NPOI.SS.UserModel.HorizontalAlignment.Center; ;
+            IFont font = workbook.CreateFont();
+            font.Color = HSSFColor.White.Index;
+            font.IsBold = true;
+            font.FontHeightInPoints = 16;
+            styleHeader.SetFont(font);
 
             if (excelPath.ToLower().EndsWith(".xls"))
             {
@@ -412,14 +440,36 @@ namespace UR_STREAM.ViewModels
             ISheet sheet = workbook.CreateSheet("sheet1");
 
             IRow rowHead = sheet.CreateRow(0);
-            for (int j = 0; j < 10; j++)
-            {
-                rowHead.CreateCell(j).SetCellValue(1);
 
+            rowHead.CreateCell(0).SetCellValue("Time");
+            rowHead.GetCell(0).CellStyle = styleHeader;
+            int i = 1;
+            int j = 1;
+            foreach (var key in KeyList)
+            {
+                var cell = rowHead.CreateCell(j++);
+                cell.SetCellValue(key.Key);
+                cell.CellStyle = styleHeader;
             }
+            foreach (var data in DataCut)
+            {
+                IRow row = sheet.CreateRow(i++);
+                var cell = row.CreateCell(0);
+                cell.SetCellValue(data.Time);
+                IDataFormat dataformat = workbook.CreateDataFormat();
+                ICellStyle styleTime = workbook.CreateCellStyle();
+                styleTime.DataFormat = dataformat.GetFormat("hh:mm:ss.000");
+                cell.CellStyle = styleTime;
+                int _j = 1;
+                foreach (var _data in data.KeyDic)
+                {
+                    row.CreateCell(_j++).SetCellValue(_data.Value);
+                }
+            }
+            sheet.AutoSizeColumn(0);
             workbook.Write(fs);
             workbook.Close();
-            Growl.Success("文件保存成功，文件路径:"+ filePath);
+            Growl.Success("文件保存成功，文件路径:" + filePath);
             SaveFinished = true;
         }
 
