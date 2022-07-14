@@ -1,0 +1,8 @@
+﻿<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:o="http://schemas.microsoft.com/winfx/2006/xaml/presentation/options">
+
+    <Geometry x:Key="StartGeometry" o:Freeze="True">M305.031716 195.566094c0-15.954367 10.718109-21.556968 23.818475-12.45159l456.459033 317.265854c13.100366 9.105379 13.100366 24.00574 0 33.111119l-456.459033 317.263807c-13.100366 9.105379-23.818475 3.502777-23.818475-12.45159L305.031716 195.566094z</Geometry>
+    <Geometry x:Key="StopGeometry" o:Freeze="True">M128 128m53.333333 0l661.333334 0q53.333333 0 53.333333 53.333333l0 661.333334q0 53.333333-53.333333 53.333333l-661.333334 0q-53.333333 0-53.333333-53.333333l0-661.333334q0-53.333333 53.333333-53.333333Z</Geometry>
+</ResourceDictionary>

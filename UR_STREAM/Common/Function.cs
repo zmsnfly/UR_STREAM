@@ -14,4 +14,39 @@ namespace UR_STREAM.Common
             return degree;
         }
     }
+
+    public class StreamHelper
+    {
+        public StreamHelper(byte[] arrMsgRec)
+        {
+            ArrMsgRec = arrMsgRec;
+        }
+
+        public double GetDeg(int index)
+        {
+            byte[] tem_arr = new byte[ArrMsgRec.Length];
+            Array.Copy(ArrMsgRec, tem_arr, ArrMsgRec.Length);
+            Array.Reverse(tem_arr);
+            var ret = Function.Radian2Degree(BitConverter.ToDouble(tem_arr, tem_arr.Length - 4 - (index * 8)));
+            return ret;
+        }
+        public double GetRad(int index)
+        {
+            byte[] tem_arr = new byte[ArrMsgRec.Length];
+            Array.Copy(ArrMsgRec, tem_arr, ArrMsgRec.Length);
+            Array.Reverse(tem_arr);
+            var ret = BitConverter.ToDouble(tem_arr, tem_arr.Length - 4 - (index * 8));
+            return ret;
+        }
+        public double GetNum(int index)
+        {
+            byte[] tem_arr = new byte[ArrMsgRec.Length];
+            Array.Copy(ArrMsgRec, tem_arr, ArrMsgRec.Length);
+            Array.Reverse(tem_arr);
+            var ret = BitConverter.ToDouble(tem_arr, tem_arr.Length - 4 - (index * 8))*1000;
+            return ret;
+        }
+
+        public byte[] ArrMsgRec { get; set; }
+    }
 }

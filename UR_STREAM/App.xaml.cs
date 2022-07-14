@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
+using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
@@ -12,8 +13,6 @@ namespace UR_STREAM
     [ValueConversion(typeof(bool), typeof(bool))]
     public class InverseBooleanConverter : IValueConverter
     {
-        #region IValueConverter Members
-
         public object Convert(object value, Type targetType, object parameter,
              System.Globalization.CultureInfo culture)
         {
@@ -28,8 +27,34 @@ namespace UR_STREAM
         {
             throw new NotSupportedException();
         }
+    }
 
-        #endregion
+
+    public class BoolToVisibilityConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (value == null)
+            {
+                return Visibility.Visible;
+            }
+            else
+            {
+                if ((bool)value)
+                {
+                    return Visibility.Visible;
+                }
+                else
+                {
+                    return Visibility.Hidden;
+                }
+            }
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
     }
     /// <summary>
     /// App.xaml 的交互逻辑

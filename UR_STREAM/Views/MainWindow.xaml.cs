@@ -27,14 +27,14 @@ namespace UR_STREAM
         {
             InitializeComponent();
             MV = new MainWindowViewModel();
-            this.DataContext = MV;
+            DataContext = MV;
         }
 
-        private void ConnectButton_Click(object sender, RoutedEventArgs e)
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            if (sender is ToggleButton)
+            if (MV.IsRunning)
             {
-                MV.CanConnect = false;
+                MV.Stop();
             }
         }
     }

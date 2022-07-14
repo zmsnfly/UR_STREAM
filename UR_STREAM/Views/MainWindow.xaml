@@ -6,24 +6,31 @@
     xmlns:hc="https://handyorg.github.io/handycontrol"
     xmlns:local="clr-namespace:UR_STREAM"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:o="http://schemas.microsoft.com/winfx/2006/xaml/presentation/options"
     xmlns:viewmodels="clr-namespace:UR_STREAM.ViewModels"
     Title="{Binding Title}"
     Width="1000"
     Height="600"
+    MinWidth="1000"
+    MinHeight="600"
     d:DataContext="{d:DesignInstance Type=viewmodels:MainWindowViewModel}"
-    ResizeMode="CanMinimize"
+    Closing="Window_Closing"
+    FontSize="15"
+    WindowStartupLocation="CenterScreen"
     mc:Ignorable="d">
+
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="50" />
             <RowDefinition />
             <RowDefinition Height="20" />
         </Grid.RowDefinitions>
-        <StackPanel Orientation="Horizontal">
+        <StackPanel VerticalAlignment="Center" Orientation="Horizontal">
             <TextBox
                 Width="200"
-                Height="25"
+                Height="35"
                 Margin="20,0"
+                VerticalAlignment="Center"
                 VerticalContentAlignment="Center"
                 hc:InfoElement.Title="IP地址："
                 hc:InfoElement.TitlePlacement="Left"
@@ -32,22 +39,53 @@
                 Text="{Binding IP}" />
             <TextBox
                 Width="150"
-                Height="25"
+                Height="35"
                 Margin="20,0"
+                VerticalAlignment="Center"
                 VerticalContentAlignment="Center"
                 hc:InfoElement.Title="端口："
                 hc:InfoElement.TitlePlacement="Left"
                 IsEnabled="{Binding IsRunning, Converter={StaticResource InverseBooleanConverter}}"
                 Style="{StaticResource TextBoxExtend}"
                 Text="{Binding Port}" />
-            <TextBlock
-                Margin="20,0,10,0"
-                VerticalAlignment="Center"
-                Text="自动保存" />
-            <ToggleButton
-                VerticalAlignment="Center"
-                IsChecked="True"
-                Style="{StaticResource ToggleButtonSwitch}" />
+
+            <StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
+                <ToggleButton
+                    x:Name="ButtonRecord"
+                    Width="30"
+                    Height="30"
+                    Margin="3"
+                    hc:BorderElement.CornerRadius="6"
+                    hc:IconSwitchElement.Geometry="{StaticResource StartGeometry}"
+                    hc:IconSwitchElement.GeometrySelected="{StaticResource StopGeometry}"
+                    Background="{DynamicResource PrimaryBrush}"
+                    Command="{Binding RecordCommand}"
+                    IsChecked="{Binding IsRecording}"
+                    IsEnabled="{Binding IsRunning}"
+                    Style="{StaticResource ToggleButtonIconPrimary}" />
+                <hc:ToggleBlock IsChecked="{Binding IsChecked, ElementName=ButtonRecord}">
+                    <hc:ToggleBlock.UnCheckedContent>
+                        <TextBlock
+                            Margin="5"
+                            VerticalAlignment="Center"
+                            Text="点击记录数据" />
+                    </hc:ToggleBlock.UnCheckedContent>
+                    <hc:ToggleBlock.CheckedContent>
+                        <StackPanel Orientation="Vertical">
+                            <TextBlock Margin="5" Text="正在记录数据..." />
+                            <ProgressBar
+                                Width="100"
+                                Height="5"
+                                Margin="5"
+                                IsIndeterminate="True"
+                                Maximum="200"
+                                Orientation="Horizontal"
+                                Style="{StaticResource ProgressBarFlat}"
+                                Value="110" />
+                        </StackPanel>
+                    </hc:ToggleBlock.CheckedContent>
+                </hc:ToggleBlock>
+            </StackPanel>
 
         </StackPanel>
         <StackPanel
@@ -58,7 +96,6 @@
             <ToggleButton
                 x:Name="ConnectButton"
                 MinWidth="50"
-                Click="ConnectButton_Click"
                 Command="{Binding StartCommand}"
                 Content="连接"
                 Foreground="{DynamicResource PrimaryTextBrush}"
@@ -70,90 +107,78 @@
                 Margin="25,0,25,0"
                 Command="{Binding StopCommand}"
                 Content="断开"
-                IsEnabled="{Binding IsRunning}" />
+                IsEnabled="{Binding CanStop}" />
         </StackPanel>
         <Grid Grid.Row="1">
             <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="2*" />
                 <ColumnDefinition />
-                <ColumnDefinition Width="0.5*" />
             </Grid.ColumnDefinitions>
-            <Border
-                Grid.Column="1"
-                Margin="5,15,5,5"
-                BorderBrush="Black"
-                BorderThickness="1">
-                <DockPanel>
-                    <StackPanel
-                        Margin="10,0,0,0"
-                        HorizontalAlignment="Left"
-                        VerticalAlignment="Center"
-                        DockPanel.Dock="Left"
-                        Orientation="Vertical">
-                        <TextBlock
-                            Margin="0,10"
-                            FontSize="36"
-                            Text="J1    :" />
-                        <TextBlock
-                            Margin="0,10"
-                            FontSize="36"
-                            Text="J2    :" />
-                        <TextBlock
-                            Margin="0,10"
-                            FontSize="36"
-                            Text="J3    :" />
-                        <TextBlock
-                            Margin="0,10"
-                            FontSize="36"
-                            Text="J4  :" />
-                        <TextBlock
-                            Margin="0,10"
-                            FontSize="36"
-                            Text="J5  :" />
-                        <TextBlock
-                            Margin="0,10"
-                            FontSize="36"
-                            Text="J6  :" />
-                    </StackPanel>
-                    <StackPanel
-                        Margin="0,0,10,0"
-                        HorizontalAlignment="Right"
-                        VerticalAlignment="Center"
-                        DockPanel.Dock="Right"
-                        Orientation="Vertical">
-                        <TextBlock
-                            Margin="0,10"
-                            Background="AliceBlue"
-                            FontSize="36"
-                            Text="{Binding J1}" />
-                        <TextBlock
-                            Margin="0,10"
-                            Background="AliceBlue"
-                            FontSize="36"
-                            Text="{Binding J2}" />
-                        <TextBlock
-                            Margin="0,10"
-                            Background="AliceBlue"
-                            FontSize="36"
-                            Text="{Binding J3}" />
-                        <TextBlock
-                            Margin="0,10"
-                            Background="AliceBlue"
-                            FontSize="36"
-                            Text="{Binding J4}" />
-                        <TextBlock
-                            Margin="0,10"
-                            Background="AliceBlue"
-                            FontSize="36"
-                            Text="{Binding J5}" />
-                        <TextBlock
-                            Margin="0,10"
-                            Background="AliceBlue"
-                            FontSize="36"
-                            Text="{Binding J6}" />
-                    </StackPanel>
-                </DockPanel>
-
-            </Border>
+            <hc:Card
+                Margin="8"
+                BorderThickness="0"
+                Effect="{DynamicResource EffectShadow2}">
+                <Border CornerRadius="4,4,0,0">
+                    <DataGrid
+                        HorizontalAlignment="Center"
+                        AutoGenerateColumns="False"
+                        FontSize="18"
+                        FontWeight="Bold"
+                        HeadersVisibility="All"
+                        IsReadOnly="True"
+                        ItemsSource="{Binding URDataList}"
+                        MinRowHeight="60"
+                        RowHeaderWidth="50"
+                        Visibility="{Binding IsRunning, Converter={StaticResource BoolToVisibilityConverter}}">
+                        <DataGrid.RowHeaderTemplate>
+                            <DataTemplate>
+                                <CheckBox IsChecked="{Binding IsSelected, RelativeSource={RelativeSource AncestorType=DataGridRow}}" />
+                            </DataTemplate>
+                        </DataGrid.RowHeaderTemplate>
+                        <DataGrid.Columns>
+                            <DataGridTextColumn
+                                Width="250"
+                                Binding="{Binding TimeFormat}"
+                                CanUserResize="False"
+                                Header="Time"
+                                IsReadOnly="True" />
+                            <DataGridTextColumn
+                                Width="1*"
+                                Binding="{Binding Key}"
+                                CanUserResize="False"
+                                Header="Key"
+                                IsReadOnly="True" />
+                            <DataGridTextColumn
+                                Width="4*"
+                                Binding="{Binding Value}"
+                                CanUserResize="False"
+                                Header="Value"
+                                IsReadOnly="True" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Border>
+            </hc:Card>
+            <Grid Grid.Column="1">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="1*" />
+                    <RowDefinition Height="3*" />
+                </Grid.RowDefinitions>
+                <hc:Card
+                    Margin="8"
+                    BorderThickness="0"
+                    Effect="{DynamicResource EffectShadow2}">
+                    <Border CornerRadius="4,4,0,0">
+                        <Grid />
+                    </Border>
+                </hc:Card>
+                <hc:Card
+                    Grid.Row="1"
+                    Margin="8"
+                    BorderThickness="0"
+                    Effect="{DynamicResource EffectShadow2}">
+                    <Border CornerRadius="4,4,0,0" />
+                </hc:Card>
+            </Grid>
         </Grid>
         <StackPanel
             Grid.Row="2"
@@ -175,5 +200,14 @@
                 VerticalAlignment="Center"
                 Text="{Binding StateText}" />
         </StackPanel>
+        <ScrollViewer
+            Grid.Row="1"
+            HorizontalAlignment="Right"
+            VerticalScrollBarVisibility="Hidden">
+            <StackPanel
+                Margin="0,10,10,10"
+                VerticalAlignment="Top"
+                hc:Growl.GrowlParent="True" />
+        </ScrollViewer>
     </Grid>
 </hc:Window>
