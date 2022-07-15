@@ -7,12 +7,12 @@ using System.Windows;
 // 有关程序集的一般信息由以下
 // 控制。更改这些特性值可修改
 // 与程序集关联的信息。
-[assembly: AssemblyTitle("UR_STREAM")]
+[assembly: AssemblyTitle("UR Robot Data Processing")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("UR_STREAM")]
-[assembly: AssemblyCopyright("Copyright ©  2022")]
+[assembly: AssemblyCopyright("422Lab")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

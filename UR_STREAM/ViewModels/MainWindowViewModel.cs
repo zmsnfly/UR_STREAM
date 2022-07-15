@@ -26,6 +26,11 @@ namespace UR_STREAM.ViewModels
         public MainWindowViewModel()
         {
             Title = "UR_STREAM";
+            Init();
+        }
+
+        private void Init()
+        {
             IP = "192.168.122.10";
             Port = "30003";
             IsRunning = false;
@@ -35,22 +40,11 @@ namespace UR_STREAM.ViewModels
             URDataList = new List<URData>();
             CurrentData = new ObservableCollection<KeyValueModel>();
             KeyList = new Dictionary<string, double>();
-            InitURDataList();
-        }
-
-        private void InitURDataList()
-        {
             KeyList.Clear();
             URDataList.Clear();
         }
 
-        private List<URData> urDataList;
-        public List<URData> URDataList
-        {
-            get { return urDataList; }
-            set { urDataList = value; }
-        }
-
+        public List<URData> URDataList { get; set; }
 
         private ObservableCollection<KeyValueModel> currentData;
         public ObservableCollection<KeyValueModel> CurrentData
@@ -111,6 +105,9 @@ namespace UR_STREAM.ViewModels
             get => canStop;
             set => SetProperty(ref canStop, value);
         }
+        private bool? isRecording;
+        public bool? IsRecording { get => isRecording; set { SetProperty(ref isRecording, value); UpdateCanStop(); } }
+
         void UpdateCanStop()
         {
             CanStop = (IsRunning && !(bool)IsRecording) || SaveFinished;
@@ -132,7 +129,6 @@ namespace UR_STREAM.ViewModels
             set { SetProperty(ref stateColor, value); }
         }
 
-
         private string title;
 
         public string Title { get => title; set => SetProperty(ref title, value); }
@@ -150,7 +146,6 @@ namespace UR_STREAM.ViewModels
                 return startCommand;
             }
         }
-
 
         private void Start()
         {
@@ -262,7 +257,7 @@ namespace UR_STREAM.ViewModels
 
             IsRunning = false;
             CanConnect = true;
-            InitURDataList();
+            Init();
         }
 
         private void RecieveMsg()
@@ -330,7 +325,7 @@ namespace UR_STREAM.ViewModels
                             {
                                 Application.Current.Dispatcher.Invoke((Action)(() =>
                                 {
-                                    CurrentData.Add(new KeyValueModel(DateTime.Now, key.Key, key.Value));
+                                    CurrentData.Add(new KeyValueModel(streamHelper.GetTime(), key.Key, key.Value));
                                 }));
                             }
                         }
@@ -472,8 +467,5 @@ namespace UR_STREAM.ViewModels
             Growl.Success("文件保存成功，文件路径:" + filePath);
             SaveFinished = true;
         }
-
-        private bool? isRecording;
-        public bool? IsRecording { get => isRecording; set { SetProperty(ref isRecording, value); UpdateCanStop(); } }
     }
 }
