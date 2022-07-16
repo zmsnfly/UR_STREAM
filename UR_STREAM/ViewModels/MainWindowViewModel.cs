@@ -39,8 +39,6 @@ namespace UR_STREAM.ViewModels
             IsRecording = false;
             URDataList = new List<URData>();
             CurrentData = new ObservableCollection<KeyValueModel>();
-            KeyList = new Dictionary<string, double>();
-            KeyList.Clear();
             URDataList.Clear();
         }
 
@@ -52,8 +50,6 @@ namespace UR_STREAM.ViewModels
             get => currentData;
             set => SetProperty(ref currentData, value);
         }
-
-        public Dictionary<string, double> KeyList { get; set; }
 
         private readonly UInt32 TotalMsgLength = 3288596480;
 
@@ -287,29 +283,15 @@ namespace UR_STREAM.ViewModels
                     if (total_msg_length == TotalMsgLength)
                     {
                         StreamHelper streamHelper = new StreamHelper(arrMsgRec);
-                        KeyList["J1"] = streamHelper.GetDeg(32);
-                        KeyList["J2"] = streamHelper.GetDeg(33);
-                        KeyList["J3"] = streamHelper.GetDeg(34);
-                        KeyList["J4"] = streamHelper.GetDeg(35);
-                        KeyList["J5"] = streamHelper.GetDeg(36);
-                        KeyList["J6"] = streamHelper.GetDeg(37);
-                        KeyList["X"] = streamHelper.GetNum(56);
-                        KeyList["Y"] = streamHelper.GetNum(57);
-                        KeyList["Z"] = streamHelper.GetNum(58);
-                        KeyList["RX"] = streamHelper.GetRad(59);
-                        KeyList["RY"] = streamHelper.GetRad(60);
-                        KeyList["RZ"] = streamHelper.GetRad(61);
-
                         URData urData = new URData
                         {
                             Time = streamHelper.GetTime(),
-                            KeyDic = new Dictionary<string, double>(KeyList)
+                            KeyDic = streamHelper.GenerateDic()
                         };
+
                         URDataList.Add(urData);
 
-                        Application.Current.Dispatcher.Invoke(RemoveUnusedItem);
-
-                        foreach (var key in KeyList)
+                        foreach (var key in urData.KeyDic)
                         {
                             bool isContain = false;
                             foreach (var data in CurrentData)
@@ -318,39 +300,20 @@ namespace UR_STREAM.ViewModels
                                 {
                                     isContain = true;
                                     data.Value = key.Value;
-                                    data.Time = streamHelper.GetTime();
+                                    data.Time = urData.Time;
                                 }
                             }
                             if (!isContain)
                             {
                                 Application.Current.Dispatcher.Invoke((Action)(() =>
                                 {
-                                    CurrentData.Add(new KeyValueModel(streamHelper.GetTime(), key.Key, key.Value));
+                                    CurrentData.Add(new KeyValueModel(urData.Time, key.Key, key.Value));
                                 }));
                             }
                         }
                     }
                 }
 
-            }
-        }
-
-        private void RemoveUnusedItem()
-        {
-            foreach (var data in CurrentData.ToArray())
-            {
-                bool isContain = false;
-                foreach (var key in KeyList)
-                {
-                    if (key.Key.Equals(data.Key))
-                    {
-                        isContain = true;
-                    }
-                }
-                if (!isContain)
-                {
-                    CurrentData.Remove(data);
-                }
             }
         }
 
@@ -440,10 +403,10 @@ namespace UR_STREAM.ViewModels
             rowHead.GetCell(0).CellStyle = styleHeader;
             int i = 1;
             int j = 1;
-            foreach (var key in KeyList)
+            foreach (var keydic in URDataList[0].KeyDic)
             {
                 var cell = rowHead.CreateCell(j++);
-                cell.SetCellValue(key.Key);
+                cell.SetCellValue(keydic.Key);
                 cell.CellStyle = styleHeader;
             }
             foreach (var data in DataCut)
