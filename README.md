@@ -1,3 +1,7 @@
+# 关于
+UR机器人数据收集软件，可以使用[URSim](https://s3-eu-west-1.amazonaws.com/ur-support-site/155566/URSim_VIRTUAL-3.15.7.106331.rar)进行模拟。
+![](https://raw.githubusercontent.com/zmsnfly/Resources/main/img/20220802154924.png)
+
 # 使用说明
 - 点击[Release](https://github.com/zmsnfly/UR_TCP/releases)下载最新版本运行，软件运行需要[ .NET Framework 4.7.2](https://dotnet.microsoft.com/zh-cn/download/dotnet-framework/net472)环境
 - 可以在`UR_STREAM/Common/Function.cs `修改需要收集的机器人数据，所需的三个数据分别是数据名称、位数、以及需要返回的数据类型
